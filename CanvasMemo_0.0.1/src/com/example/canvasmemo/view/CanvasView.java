@@ -9,6 +9,7 @@ import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,6 +22,7 @@ public class CanvasView extends View {
 
 	private float startX;
 	private float startY;
+
 
 	public static class Painter {
 
@@ -42,6 +44,7 @@ public class CanvasView extends View {
 
 	}
 
+	//コンストラクタ
 	public CanvasView(Context context) {
 		super(context);
 		paint = Painter.createDefaultPaint();
@@ -55,16 +58,24 @@ public class CanvasView extends View {
 		paint = Painter.createDefaultPaint();
 	}
 
-
-	
-	
+	//セットする
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = Bitmap.createBitmap(bitmap);
 	}
+	//ページのクリア
+	public void clearPage() {
+		this.bitmap = null;
+		this.path = null;
+	}
+
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.drawColor(Color.argb(0, 255, 255, 255));
+
+		if (bitmap == null && path == null) {
+			canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+			return;
+		}
 
 		if (bitmap != null) {
 			canvas.drawBitmap(bitmap, 0, 0, null);

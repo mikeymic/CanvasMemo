@@ -16,8 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.canvasmemo.R;
+import com.example.canvasmemo.data.Page;
 import com.example.canvasmemo.database.DatabaseDao;
 import com.example.canvasmemo.database.DatabaseHelper;
 import com.example.canvasmemo.manager.OverlayManager;
@@ -30,76 +33,227 @@ public class MainActivity extends Activity {
 	private DrawerLayout drawer;
 	private ActionBarDrawerToggle drawerToggle;
 
+
 	private boolean flg = false;
-	
+
+	private static Page page;
+	private int currentPageIndex;
+
+	private Button button;
+	private TextView textPageIndex;
+
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		canvasView = new CanvasView(this); // 描画用クラス
-//		setContentView(canvasView);
-
-
 		setContentView(R.layout.activity_canvas_drawer);
-
-		canvasView = (CanvasView) findViewById(R.id.left_draw);
-//		canvasView.getRootView().setBackgroundColor(Color.argb(00, 255, 255, 255));
 
 		createNotification();
 		createDrawer();
-		
-		Button button = (Button) findViewById(R.id.button_overlay);
-		button.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				if (flg != true) {
-					
-				OverlayManager.onUpdateMeasureSize(MainActivity.this); // Window, View ActionBar, // StatusBarのサイズを取得
-				OverlayManager.takeCaptureThenAddToOverlay(canvasView); // スクリーンショットを取り、オーバーレイ用のbitmapに合成
-				byte[] stream = OverlayManager.createOverlayBuffer(); // オーバーレイ用のbitmapをバッファに変換
+		findViewsById();
+		setListener();
 
-				Intent intent = new Intent(MainActivity.this, LayerService.class); // サービスにバッファを送るためにIntentを作成
-				intent.putExtra(OverlayManager.overlayName, stream); // バッファをIntentに付属させる
-				startService(intent); // バッファを送り、サービスの起動
-				flg = !flg;
-				} else {
-					stopService(new Intent(MainActivity.this, LayerService.class)); // サービスを停止
-					flg = !flg;
-				}
-				
-			}
-		});
-		
-		//保存
-		findViewById(R.id.drawer_save).setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				
-				DatabaseHelper helper = new DatabaseHelper(MainActivity.this);
-				// データベースを書き込みモードでopen
-				SQLiteDatabase db = helper.getWritableDatabase();
-				DatabaseDao dao = new DatabaseDao(db);
+		page = new Page();
+		loadAllPageIndex();
+		loadPage(page.getPageIndex());//最終ページを開く
+		currentPageIndex = page.getPageIndex(); //現在のページに設定
 
-				Bitmap bitmap = Bitmap.createBitmap(OverlayManager.takeCapture(canvasView));
-				byte[] image = OverlayManager.createOverlayBuffer(bitmap);
-				dao.insertImages(image);
-			}
-		});
+		textPageIndex.setText(String.valueOf(currentPageIndex));//テキストビューに現在ページを設定
 
-		//読み込み
-		findViewById(R.id.drawer_load).setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				DatabaseHelper helper = new DatabaseHelper(MainActivity.this);
-				SQLiteDatabase db = helper.getReadableDatabase();
-				DatabaseDao dao = new DatabaseDao(db);
-		
-				canvasView.setBitmap(dao.getBitmapInPage());
-			}
-		});
 	}
+
+	//ビューの起動
+	private void findViewsById() {
+		canvasView = (CanvasView) findViewById(R.id.left_draw);
+		textPageIndex = (TextView) findViewById(R.id.drawer_page_index);
+		button = (Button) findViewById(R.id.button_overlay);
+	}
+	//リスナーの設定
+	private void setListener() {
+		//オーバーレイ
+		findViewById(R.id.button_overlay).setOnClickListener(onClickOverlayButton);
+		//保存
+		findViewById(R.id.drawer_save).setOnClickListener(onClickSaveButton);
+		//読み込み
+		findViewById(R.id.drawer_load).setOnClickListener(onClickLoadButton);
+		//クリア
+		findViewById(R.id.drawer_clear).setOnClickListener(onClickClearButton);
+
+		//次のページ
+		findViewById(R.id.drawer_page_next).setOnClickListener(onClickNextPageButton);
+		//前のページ
+		findViewById(R.id.drawer_page_previous).setOnClickListener(onClickPreviousPageButton);
+
+		//ページ新規作成
+		findViewById(R.id.drawer_page_new).setOnClickListener(onClickCreateNewPageButton);
+		//ページ削除
+		findViewById(R.id.drawer_page_delete).setOnClickListener(onClickDeletePageButton);
+	}
+
+	//リスナーの処理
+	private OnClickListener onClickOverlayButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			flg = !flg;
+			if (flg == true) {
+				button.setText("stop overlay");
+
+			OverlayManager.onUpdateMeasureSize(MainActivity.this); // Window, View ActionBar, // StatusBarのサイズを取得
+			OverlayManager.takeCaptureThenAddToOverlay(canvasView); // スクリーンショットを取り、オーバーレイ用のbitmapに合成
+			byte[] stream = OverlayManager.createOverlayBuffer(); // オーバーレイ用のbitmapをバッファに変換
+
+			Intent intent = new Intent(MainActivity.this, LayerService.class); // サービスにバッファを送るためにIntentを作成
+			intent.putExtra(OverlayManager.overlayName, stream); // バッファをIntentに付属させる
+			startService(intent); // バッファを送り、サービスの起動
+			} else {
+				button.setText("stat overlay");
+				stopService(new Intent(MainActivity.this, LayerService.class)); // サービスを停止
+			}
+		}
+	};
+ 	private OnClickListener onClickSaveButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+//			saveImage();
+			updatePage();
+		}
+	};
+	private OnClickListener onClickLoadButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			loadPage(currentPageIndex);
+		}
+	};
+	private OnClickListener onClickNextPageButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (currentPageIndex < page.getPageIndex()) {
+				currentPageIndex++;
+				loadPage(currentPageIndex);
+				textPageIndex.setText(String.valueOf(currentPageIndex));
+			} else {
+				Toast.makeText(getApplicationContext(), "次のページはありません", Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
+	private OnClickListener onClickPreviousPageButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (currentPageIndex > 1) {
+				currentPageIndex--;
+				loadPage(currentPageIndex);
+				textPageIndex.setText(String.valueOf(currentPageIndex));
+			} else {
+				Toast.makeText(getApplicationContext(), "前のページはありません", Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
+	private OnClickListener onClickClearButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			canvasView.clearPage();
+			canvasView.invalidate();
+		}
+	};
+	private OnClickListener onClickCreateNewPageButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			createNewPage();
+		}
+	};
+	private OnClickListener onClickDeletePageButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			deletePage();
+			loadAllPageIndex();
+			currentPageIndex--;
+			loadPage(currentPageIndex);
+			textPageIndex.setText(String.valueOf(currentPageIndex));
+			Toast.makeText(getApplicationContext(), "ページを削除しました", Toast.LENGTH_SHORT).show();
+		}
+	};
+
+
+
+	//データベースの起動 [書き込み/読み込みモード]
+ 	private DatabaseDao OpenWritableDatabase() {
+		DatabaseHelper helper = new DatabaseHelper(MainActivity.this);
+		SQLiteDatabase db = helper.getWritableDatabase();
+		DatabaseDao dao = new DatabaseDao(db);
+		return dao;
+	}
+	private DatabaseDao LoadReadableDatabase() {
+		DatabaseHelper helper = new DatabaseHelper(MainActivity.this);
+		SQLiteDatabase db = helper.getReadableDatabase();
+		DatabaseDao dao = new DatabaseDao(db);
+		return dao;
+	}
+
+
+	//データの読み込み/書き込み
+	private void createNewPage() {
+		saveImage();
+		loadAllPageIndex();
+		loadPage(page.getPageIndex());//最終ページを開く
+		currentPageIndex = page.getPageIndex(); //現在のページに設定
+		Toast.makeText(getApplicationContext(), "新しいページを作成しました", Toast.LENGTH_SHORT).show();
+	}
+	//ページのアップデート
+	private void updatePage() {
+		DatabaseDao dao = OpenWritableDatabase();
+		Bitmap bitmap = Bitmap.createBitmap(OverlayManager.takeCapture(canvasView));
+		byte[] image = OverlayManager.createOverlayBuffer(bitmap);
+		dao.updatePage(image, currentPageIndex);
+	}
+
+	private void loadAllPageIndex() {
+		DatabaseDao dao = LoadReadableDatabase();
+		page.setPageIndex(dao.getAllPage());
+	}
+
+	private void loadPage(int index) {
+		DatabaseDao dao = LoadReadableDatabase();
+		Page page = dao.getPage(index);
+		if (page.getBitmap() != null) {
+			canvasView.setBitmap(page.getBitmap());
+		}
+		textPageIndex.setText(String.valueOf(page.getPageIndex()));
+		canvasView.invalidate();
+	}
+
+	private void saveImage() {
+		DatabaseDao dao = OpenWritableDatabase();
+		Bitmap bitmap = Bitmap.createBitmap(OverlayManager.takeCapture(canvasView));
+		byte[] image = OverlayManager.createOverlayBuffer(bitmap);
+		dao.insertImages(image);
+	}
+
+	private void deletePage() {
+		DatabaseDao dao = OpenWritableDatabase();
+		dao.deletePage(currentPageIndex);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//ActionBar消したので今は使わない
 	//ActionBar消したので今は使わない

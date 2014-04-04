@@ -3,9 +3,9 @@ package com.example.canvasmemo.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
-import com.example.canvasmemo.manager.FileManager;
+import com.example.canvasmemo.data.Page;
 public class DatabaseDao {
 
 
@@ -21,7 +21,6 @@ public class DatabaseDao {
 //	private static final String[] COLUMNS = {ID, NAME, TEXTS, IMAGES};
 	private static final String[] COLUMNS = {ID, NAME, IMAGE};
 
-	private FileManager fiManager = new FileManager();
 
 	public DatabaseDao (SQLiteDatabase db) {
 		this.db = db;
@@ -70,20 +69,49 @@ public class DatabaseDao {
 //		}
 //		return page;
 //	}
-	
-	public Bitmap getBitmapInPage(){
-		
-		String where = ID + "=  1" ;
-		Cursor cursor = db.query(
-				TABLE_NAME, 
-				COLUMNS, 
-				where, 
-				null, null, null, null);
-		
-		return fiManager.DeSerializeImage(cursor.getBlob(cursor.getColumnIndex(IMAGE)));
+
+	public long updatePage(byte[] imageStream, int pageIndex) {
+
+		String where = ID + " = ?";
+		ContentValues values = new ContentValues();
+		values.put(IMAGE, imageStream);
+		return db.update(TABLE_NAME, values, where, new String[]{String.valueOf(pageIndex)});
 	}
 
+//	return db.insert(TABLE_NAME, null, values);
 
+	public int getAllPage(){
+
+		Cursor cursor = db.query(TABLE_NAME, COLUMNS, null, null, null, null, null);
+
+		int pageIndex = 0;
+		while (cursor.moveToNext() != false) {
+			pageIndex = cursor.getInt(cursor.getColumnIndex(ID));
+		}
+		return pageIndex;
+	}
+	public Page getPage(int index){
+
+		Page page = new Page();
+
+		String where = ID + "=  ?" ;
+		Cursor cursor = db.query(TABLE_NAME, COLUMNS, where, new String[]{String.valueOf(index)}, null, null, null);
+
+		byte[] stream = null;
+		while (cursor.moveToNext() != false) {
+			stream = cursor.getBlob(cursor.getColumnIndex(IMAGE));
+			int i = cursor.getInt(cursor.getColumnIndex(ID));
+			page.setPageIndex(i);
+//			page.setPageIndex(cursor.getInt(cursor.getColumnIndex(ID)));
+			page.setBitmap(BitmapFactory.decodeByteArray(stream, 0, stream.length));
+		}
+		return page;
+	}
+
+	public void deletePage(int pageIndex) {
+		String where = ID + " = ?";
+		db.delete(TABLE_NAME, where, new String[] {String.valueOf(pageIndex)});
+	}
 
 
 

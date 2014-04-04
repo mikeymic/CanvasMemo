@@ -1,8 +1,5 @@
 package com.example.canvasmemo.service;
 
-import com.example.canvasmemo.manager.OverlayManager;
-import com.example.canvasmemo.view.CanvasView;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,12 +8,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.IBinder;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.example.canvasmemo.manager.OverlayManager;
+
 public class LayerService extends Service {
 
-	static CanvasView view;
+	static View view;
 
 	WindowManager wm;
 
@@ -36,7 +36,7 @@ public class LayerService extends Service {
 				WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY, //システムアラートウィンドウを使う
 				WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, //このViewに対してonTouchEventを検知しない
 				PixelFormat.TRANSLUCENT);
-		view = new CanvasView(this); //Bitmapを格納するViewの生成
+		view = new View(this); //Bitmapを格納するViewの生成
 
 		byte[] data = intent.getByteArrayExtra(OverlayManager.overlayName); //インテントから送られてきたバッファを取得
 		bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
