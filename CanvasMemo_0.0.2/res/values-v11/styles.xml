@@ -1,0 +1,13 @@
+<resources>
+
+	<style name="AppBaseTheme" parent="android:Theme.Holo">
+		<!-- API 11 theme customizations can go here. -->
+	</style>
+
+	<style name="Theme.Transparent" parent="android:Theme.Holo.NoActionBar">
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowBackground">@drawable/transparent_background</item>
+		<item name="android:windowTitleSize">20dip</item>
+	</style>
+
+</resources>
