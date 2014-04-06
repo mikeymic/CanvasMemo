@@ -97,21 +97,7 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			flg = !flg;
-			if (flg == true) {
-				button.setText("stop overlay");
-
-			OverlayManager.onUpdateMeasureSize(MainActivity.this); // Window, View ActionBar, // StatusBarのサイズを取得
-			OverlayManager.takeCaptureThenAddToOverlay(canvasView); // スクリーンショットを取り、オーバーレイ用のbitmapに合成
-			byte[] stream = OverlayManager.createOverlayBuffer(); // オーバーレイ用のbitmapをバッファに変換
-
-			Intent intent = new Intent(MainActivity.this, LayerService.class); // サービスにバッファを送るためにIntentを作成
-			intent.putExtra(OverlayManager.overlayName, stream); // バッファをIntentに付属させる
-			startService(intent); // バッファを送り、サービスの起動
-			} else {
-				button.setText("stat overlay");
-				stopService(new Intent(MainActivity.this, LayerService.class)); // サービスを停止
-			}
+			startOverlayService();
 		}
 	};
  	private OnClickListener onClickSaveButton = new OnClickListener() {
@@ -185,6 +171,28 @@ public class MainActivity extends Activity {
 
 
 
+
+
+
+	//オーバーレイの作成
+	private void startOverlayService() {
+		flg = !flg;
+		if (flg == true) {
+			button.setText("stop overlay");
+
+		OverlayManager.onUpdateMeasureSize(MainActivity.this); // Window, View ActionBar, // StatusBarのサイズを取得
+		OverlayManager.takeCaptureThenAddToOverlay(canvasView); // スクリーンショットを取り、オーバーレイ用のbitmapに合成
+		byte[] stream = OverlayManager.createOverlayBuffer(); // オーバーレイ用のbitmapをバッファに変換
+
+		Intent intent = new Intent(MainActivity.this, LayerService.class); // サービスにバッファを送るためにIntentを作成
+		intent.putExtra(OverlayManager.overlayName, stream); // バッファをIntentに付属させる
+		startService(intent); // バッファを送り、サービスの起動
+		} else {
+			button.setText("stat overlay");
+			stopService(new Intent(MainActivity.this, LayerService.class)); // サービスを停止
+		}
+	}
+
 	//データベースの起動 [書き込み/読み込みモード]
  	private DatabaseDao OpenWritableDatabase() {
 		DatabaseHelper helper = new DatabaseHelper(MainActivity.this);
@@ -242,17 +250,6 @@ public class MainActivity extends Activity {
 		DatabaseDao dao = OpenWritableDatabase();
 		dao.deletePage(currentPageIndex);
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 
 	//ActionBar消したので今は使わない
@@ -316,6 +313,7 @@ public class MainActivity extends Activity {
 		mgr.notify(1, notification);
 	}
 
+	//ドロワーの作成
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
