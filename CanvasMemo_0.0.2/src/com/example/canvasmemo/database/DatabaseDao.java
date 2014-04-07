@@ -8,11 +8,12 @@ public class DatabaseDao {
 
 	private static final String TABLE_NAME = DatabaseHelper.TABLE_NAME;
 	private static final String ID = DatabaseHelper.CLM_ID;
+	private static final String NAME = DatabaseHelper.CLM_NAME;
 	public static final String IMAGE = DatabaseHelper.CLM_IMAGE;
-
+	private static final String DATE = DatabaseHelper.CLM_DATE;
 
 	private SQLiteDatabase db;
-	private static final String[] COLUMNS = {ID, IMAGE};
+	private static final String[] COLUMNS = {ID, NAME, IMAGE, DATE};
 
 
 	public DatabaseDao (SQLiteDatabase db) {

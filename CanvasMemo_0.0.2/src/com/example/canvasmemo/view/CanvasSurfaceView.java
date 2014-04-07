@@ -140,7 +140,7 @@ public class CanvasSurfaceView extends SurfaceView implements
 			/*-----移動時-----*/
 		case MotionEvent.ACTION_MOVE:
 			// ブレ防止 [座標のズレが範囲内なら何もしない]
-			if (Math.abs(x - sx) < 1.0f || Math.abs(y - sy) < 1.0f) {
+			if (Math.abs(x - sx) < 5.0f || Math.abs(y - sy) < 5.0f) {
 				return false;
 			}
 			// 初回移動

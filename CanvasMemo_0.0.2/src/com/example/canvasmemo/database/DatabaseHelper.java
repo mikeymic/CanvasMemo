@@ -14,17 +14,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	//コンテンツプロバイダは使う予定がないので最初のカラムに（＿）はつけない
 	public static final String CLM_ID = "id";
 	public static final String CLM_NAME = "name";
-//	public static final String CLM_TEXTS = "texts";
-//	public static final String CLM_IMAGES = "images";
 	public static final String CLM_IMAGE = "image";
+	public static final String CLM_DATE = "date";
 
 	private static final String CREATE_DATABASE_TABLE =
 			"CREATE TABLE " + TABLE_NAME +" ("
 	+ CLM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 	+ CLM_NAME + " TEXT, "
-//	+ CLM_TEXTS + " BLOB, "
-//	+ CLM_IMAGES + " BLOB, "
 	+ CLM_IMAGE + " BLOB "
+	+ CLM_DATE + " INTEGER, , "
 	+	");";
 
 	private static final String DROP_TABLE =

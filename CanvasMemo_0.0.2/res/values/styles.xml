@@ -1,13 +1,13 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<style name="AppBaseTheme" parent="android:Theme.Black"></style>
+    <style name="AppBaseTheme" parent="android:Theme"></style>
 
-	<style name="AppTheme" parent="AppBaseTheme"></style>
+    <style name="AppTheme" parent="AppBaseTheme"></style>
 
-	<style name="Theme.Transparent" parent="AppBaseTheme">
-		<item name="android:windowIsTranslucent">true</item>
-		<item name="android:windowBackground">@drawable/transparent_background</item>
-		<item name="android:windowTitleSize">20dip</item>
-	</style>
+    <style name="Theme.Transparent" parent="android:Theme.Panel">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">false</item>
+        <item name="android:windowTitleSize">20dip</item>
+    </style>
 
 </resources>

@@ -1,6 +1,7 @@
-package com.example.canvasmemo;
+package com.example.canvasmemo.activity;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,11 +11,14 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
+import com.example.canvasmemo.R;
 import com.example.canvasmemo.database.DatabaseDao;
 import com.example.canvasmemo.database.DatabaseHelper;
 import com.example.canvasmemo.service.OverlayService;
 import com.example.canvasmemo.view.CanvasSurfaceView;
+import com.example.canvasmemo.view.util.Util;
 
 public class CanvasMemoActivity extends Activity {
 
@@ -22,10 +26,23 @@ public class CanvasMemoActivity extends Activity {
 
 	private int pageCount;
 
+	boolean overlayFlg =false;
+	
+
+	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_canvas_memo);
+		
+		
+		/*--------------------<<<ActionBarの設定> >> -------------------*/
+		Util.actionBarUpsideDown(this); //ActionBarを下に表示する
+//		Util.actionBarSetVisiblity(this, View.GONE); //ActionBarを非表示
+		
+		View root = getWindow().getDecorView();
+		List<View> views = Util.findViewsWithClassName(root, "com.android.internal.widget.ActionBarContainer");
 
 		//ビュー取得
 		canvas = (CanvasSurfaceView) findViewById(R.id.canvasView); //XmlからSurfaceViwを取得
@@ -38,8 +55,14 @@ public class CanvasMemoActivity extends Activity {
 		getMenuInflater().inflate(R.menu.canvas_memo, menu);
 		return true;
 	}
+	
+	
+	
+	
+	
+	
+	
 
-	boolean overlayFlg =false;
 	/* (非 Javadoc)
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
@@ -84,7 +107,7 @@ public class CanvasMemoActivity extends Activity {
 	private void startOverlayService() {
 
 		//オーバーレイのズレ防止 (マージンの取得) !!!一番重要なところ。絶対いじらないこと
-//		---------------------------------------------------------------------------
+//		---------------------------------------------------------------------------	//
 		Rect rect = new Rect();
 		getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
 
@@ -93,7 +116,7 @@ public class CanvasMemoActivity extends Activity {
 		int viewHeight = canvas.getHeight();
 
 		int viewTop = displayHeight - viewHeight - statusBarHeight;
-//		---------------------------------------------------------------------------
+//		---------------------------------------------------------------------------	//
 
 
 		Intent intent = new Intent(this, OverlayService.class);
@@ -125,41 +148,41 @@ public class CanvasMemoActivity extends Activity {
 	 */
 	private void getPageCount() {
 
-		DatabaseDao dao = new DatabaseDao(OpenReadableDatabase());
+		DatabaseDao dao = new DatabaseDao(openReadMode());
 		pageCount = dao.getPageCount();
 	}
 
 	/**
-	 * 新規作成
+	 * ページの新規作成
 	 */
 	private void createNewPage() {
-		DatabaseDao dao = new DatabaseDao(OpenWritableDatabase());
+		DatabaseDao dao = new DatabaseDao(openWriteMode());
 		dao.insertNewPage();
 	}
 
 	/**
-	 * 上書き保存
+	 * ページの上書き保存
 	 * @param index
 	 */
 	private void updatePage(int index) {
-		DatabaseDao dao = new DatabaseDao(OpenWritableDatabase());
+		DatabaseDao dao = new DatabaseDao(openWriteMode());
 		dao.updatePage(serializeImage(), index);
 	}
 
 	/**
-	 * 読み込み
+	 * ページの読み込み
 	 */
 	private void loadPage(int index) {
-		DatabaseDao dao = new DatabaseDao(OpenReadableDatabase());
+		DatabaseDao dao = new DatabaseDao(openReadMode());
 		dao.getImageOfPage(index);
 	}
 
 	/**
-	 * 削除
+	 * ページの削除
 	 * @param index
 	 */
 	private void deletePage(int index) {
-		DatabaseDao dao = new DatabaseDao(OpenWritableDatabase());
+		DatabaseDao dao = new DatabaseDao(openWriteMode());
 		dao.deletePage(index);
 	}
 
@@ -170,7 +193,7 @@ public class CanvasMemoActivity extends Activity {
 	 * 書き込みモード
 	 * @return
 	 */
- 	private SQLiteDatabase OpenWritableDatabase() {
+ 	private SQLiteDatabase openWriteMode() {
 		DatabaseHelper helper = new DatabaseHelper(CanvasMemoActivity.this);
 		SQLiteDatabase db = helper.getWritableDatabase();
 		return db;
@@ -180,7 +203,7 @@ public class CanvasMemoActivity extends Activity {
 	 * 読み込みモード
 	 * @return
 	 */
-	private SQLiteDatabase OpenReadableDatabase() {
+	private SQLiteDatabase openReadMode() {
 		DatabaseHelper helper = new DatabaseHelper(CanvasMemoActivity.this);
 		SQLiteDatabase db = helper.getReadableDatabase();
 		return db;

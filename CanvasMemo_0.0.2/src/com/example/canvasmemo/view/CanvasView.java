@@ -77,14 +77,14 @@ public class CanvasView extends View {
 		this.line = line;
 	}
 
-	/*
-	 * (非 Javadoc)
-	 *
-	 * @see android.view.View#onDraw(android.graphics.Canvas)
-	 */
+
 
 	/*--------------------<<<描画> >> -------------------*/
-
+	
+	/*
+	 * (非 Javadoc)
+	 * @see android.view.View#onDraw(android.graphics.Canvas)
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -108,6 +108,7 @@ public class CanvasView extends View {
 	float sy = 0;
 
 	/*--------------------<<<タッチイベント> >> -------------------*/
+	
 	/*
 	 * (非 Javadoc)
 	 *
