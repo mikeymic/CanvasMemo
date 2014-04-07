@@ -1,4 +1,4 @@
-package com.example.canvasmemo.activity;
+package com.example.canvasmemo0_0_6.activity;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
@@ -9,17 +9,20 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.View.OnTouchListener;
 
-import com.example.canvasmemo.R;
-import com.example.canvasmemo.database.DatabaseDao;
-import com.example.canvasmemo.database.DatabaseHelper;
-import com.example.canvasmemo.service.OverlayService;
-import com.example.canvasmemo.view.CanvasSurfaceView;
-import com.example.canvasmemo.view.util.Util;
+import com.example.canvasmemo0_0_6.R;
+import com.example.canvasmemo0_0_6.database.DatabaseDao;
+import com.example.canvasmemo0_0_6.database.DatabaseHelper;
+import com.example.canvasmemo0_0_6.service.OverlayService;
+import com.example.canvasmemo0_0_6.view.CanvasSurfaceView;
+import com.example.canvasmemo0_0_6.view.util.Util;
 
 public class CanvasMemoActivity extends Activity {
 
@@ -28,6 +31,10 @@ public class CanvasMemoActivity extends Activity {
 	private int pageCount;
 
 	boolean overlayFlg =false;
+
+
+	private GestureDetector gestureDetector;
+	private ScaleGestureDetector scaleGestureDetector;
 
 
 
@@ -40,13 +47,21 @@ public class CanvasMemoActivity extends Activity {
 
 		/*--------------------<<<ActionBarの設定> >> -------------------*/
 		Util.actionBarUpsideDown(this); //ActionBarを下に表示する
-//		Util.actionBarSetVisiblity(this, View.GONE); //ActionBarを非表示
+		Util.actionBarSetVisiblity(this, View.GONE); //ActionBarを非表示
 
 		View root = getWindow().getDecorView();
 		List<View> views = Util.findViewsWithClassName(root, "com.android.internal.widget.ActionBarContainer");
 
 		//ビュー取得
 		canvas = (CanvasSurfaceView) findViewById(R.id.canvasView); //XmlからSurfaceViwを取得
+
+	    GestureListener listener = new GestureListener(this, canvas);
+
+
+	    gestureDetector = new GestureDetector(canvas.getContext(), listener);
+	    scaleGestureDetector = new ScaleGestureDetector(canvas.getContext(), listener);
+	    canvas.setOnTouchListener(onTouchView );
+
 
 	}
 
@@ -210,50 +225,19 @@ public class CanvasMemoActivity extends Activity {
 		return db;
 	}
 
-	/* (非 Javadoc)
-	 * @see android.app.Activity#onTouchEvent(android.view.MotionEvent)
-	 */
 
+	/*--------------------<<<タッチイベント読み込み> >> -------------------*/
 
-	/*--------------------<<<データベース読み込み> >> -------------------*/
-
-
-	private int downCounter;
-	private float sx;
-	private float sy;
-@Override
-public boolean onTouchEvent(MotionEvent event) {
-	float x = event.getX();
-	float y = event.getY();
-
-	if (true/*メニューバーが表示されていたら*/) {
-		//メニューバーを非表示
-	}
-
-
-	switch (event.getAction()) {
-	case MotionEvent.ACTION_DOWN:
-			sx = x;
-			sy = y;
-			downCounter++;
-		break;
-	case MotionEvent.ACTION_MOVE:
-		break;
-	case MotionEvent.ACTION_UP:
-		if (Math.abs(x - sx) < 20.0f || Math.abs(y - sy) < 20.0f) {
-
-			if (downCounter == 2) {
-				//メニューボタンを表示する
-			}
-
-			break;
-		} else {
-			downCounter = 0;
-		}
-		break;
-	}
-	return true;
-}
+	private OnTouchListener onTouchView = new OnTouchListener() {
+	    @Override
+	    public boolean onTouch(View v, MotionEvent event) {
+	    	return event.getPointerCount() == 1 ? gestureDetector.onTouchEvent(event) : scaleGestureDetector.onTouchEvent(event);
+			/* Pointerの数が1つの時はGestureDetectorにイベントを委譲し
+			 * Pointerの数が２つの時はScaleGestureDetectorにイベントを委譲する
+			 * タッチ後の処理はリスナーを参照
+			 */
+	    }
+	};
 
 
 

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<PreferenceCategory android:title="起動オプション" >
+		<CheckBoxPreference
+			android:key="checkbox"
+			android:title="通知エリアからの起動" />
+		<CheckBoxPreference
+			android:key="checkbox"
+			android:title="アプリのシェイクによる起動と停止" />
+		<CheckBoxPreference
+			android:key="checkbox"
+			android:title="ステータスバーのアイコンを表示しない" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="画面オプション" >
+		<CheckBoxPreference
+			android:key="checkbox"
+			android:title="背景の設定" />
+		<CheckBoxPreference
+			android:key="checkbox"
+			android:title="" />
+		<CheckBoxPreference
+			android:key="checkbox"
+			android:title="ステータスバーのアイコンを表示しない" />
+	</PreferenceCategory>
+
+</PreferenceScreen>

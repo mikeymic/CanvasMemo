@@ -1,4 +1,4 @@
-package com.example.canvasmemo.view;
+package com.example.canvasmemo0_0_6.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;

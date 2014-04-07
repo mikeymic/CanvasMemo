@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="app_name">CanvasMemo_0.0.6</string>
+	<string name="action_settings">Settings</string>
+	<string name="action_overlay_start">overlay start</string>
+	<string name="action_overlay_stop">overlay start</string>
+	<string name="hello_world">Hello world!</string>
+
+</resources>
