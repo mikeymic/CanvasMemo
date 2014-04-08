@@ -1,4 +1,4 @@
-package com.example.canvasmemo0_0_6.activity;
+package com.example.canvasmemo0_0_6.activity.listener;
 
 import android.app.Activity;
 import android.content.Context;
@@ -77,7 +77,7 @@ public class GestureListener implements OnTouchListener,OnGestureListener, OnDou
 	boolean isFirstTime = true;
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
 	        float distanceY) {
-			Toast.makeText(context, "called onScroll()" + " : Motion Event1 No = " + String.valueOf(e1.getAction()) + " : Motion Event2 No = " + String.valueOf(e2.getAction()), Toast.LENGTH_SHORT).show();
+//			Toast.makeText(context, "called onScroll()" + " : Motion Event1 No = " + String.valueOf(e1.getAction()) + " : Motion Event2 No = " + String.valueOf(e2.getAction()), Toast.LENGTH_SHORT).show();
 
 		//タッチしたまま指を滑らせたとき[ACTION_MOVE]
 

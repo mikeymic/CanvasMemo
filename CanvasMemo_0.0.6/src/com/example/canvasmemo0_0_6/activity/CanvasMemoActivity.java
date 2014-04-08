@@ -18,8 +18,12 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 
 import com.example.canvasmemo0_0_6.R;
+import com.example.canvasmemo0_0_6.activity.listener.AcceleroListener;
+import com.example.canvasmemo0_0_6.activity.listener.AcceleroListener.OnAcceleroListener;
+import com.example.canvasmemo0_0_6.activity.listener.GestureListener;
 import com.example.canvasmemo0_0_6.database.DatabaseDao;
 import com.example.canvasmemo0_0_6.database.DatabaseHelper;
+import com.example.canvasmemo0_0_6.service.IntentActivityService;
 import com.example.canvasmemo0_0_6.service.OverlayService;
 import com.example.canvasmemo0_0_6.view.CanvasSurfaceView;
 import com.example.canvasmemo0_0_6.view.util.Util;
@@ -35,6 +39,7 @@ public class CanvasMemoActivity extends Activity {
 
 	private GestureDetector gestureDetector;
 	private ScaleGestureDetector scaleGestureDetector;
+	private AcceleroListener acceleroListener;
 
 
 
@@ -58,12 +63,70 @@ public class CanvasMemoActivity extends Activity {
 	    GestureListener listener = new GestureListener(this, canvas);
 
 
+	    /*--------------------<<<ジェスチャーリスナーの設定> >> -------------------*/
 	    gestureDetector = new GestureDetector(canvas.getContext(), listener);
 	    scaleGestureDetector = new ScaleGestureDetector(canvas.getContext(), listener);
-	    canvas.setOnTouchListener(onTouchView );
+	    canvas.setOnTouchListener(onTouchView);
+	
+	    /*--------------------<<<センサーのリスナーの設定> >> -------------------*/
+	    acceleroListener = new AcceleroListener(this);
+		acceleroListener.setOnAccelaroListener(OnDetectAccelero);
+
 
 
 	}
+	
+	
+	
+	
+	
+	@Override
+	protected void onPause() {
+		flg = true;
+		IntentActivityService.setFlg(flg);
+		Intent intent = new Intent(this, IntentActivityService.class);
+		startService(intent);
+		super.onPause();
+	}
+	
+
+
+
+
+
+	@Override
+	protected void onStop() {
+		flg = true;
+		IntentActivityService.setFlg(flg);
+		Intent intent = new Intent(this, IntentActivityService.class);
+		startService(intent);
+		super.onStop();
+	}
+
+
+
+
+
+
+	private boolean flg = false;
+	@Override
+	protected void onStart() {
+		super.onStart();
+		stopService(new Intent(this, IntentActivityService.class));
+	}
+
+	/*--------------------<<<加速度検知時の処理> >> -------------------*/
+	private OnAcceleroListener OnDetectAccelero = new OnAcceleroListener() {
+		@Override
+		public void onAccelero() {
+			if (flg) {
+				Intent intent = new Intent(CanvasMemoActivity.this, null);
+				startActivity(intent);
+			}
+			
+			
+		}
+	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
